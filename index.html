@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Parking Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(231, 229, 228, 0.8);
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.04);
+        }
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        .progress-bar { 
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .spot-dot {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .spot-dot:hover {
+            transform: scale(1.35);
+            cursor: pointer;
+        }
+        
+        .blueprint-bg {
+            background-color: #FAFAF9;
+            background-image: linear-gradient(rgba(214, 211, 209, 0.4) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(214, 211, 209, 0.4) 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #F5F5F4; }
+        ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 antialiased h-screen flex overflow-hidden selection:bg-amber-200 selection:text-stone-900">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-20 lg:w-64 bg-stone-50 border-r border-stone-200 flex flex-col justify-between flex-shrink-0 z-50 transition-all duration-300">
+        <div>
+            <!-- Logo -->
+            <div class="h-20 flex items-center justify-center lg:justify-start lg:px-8 border-b border-stone-200">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-amber-500 rounded-xl shadow-md shadow-amber-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <span class="font-heading text-2xl font-extrabold tracking-tight text-stone-800 hidden lg:block">Park<span class="text-amber-500">Flow</span></span>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="p-4 space-y-2 mt-2">
+                <button onclick="switchTab('availability')" id="nav-availability" class="nav-btn w-full flex items-center gap-4 px-4 py-3 bg-amber-100 text-amber-900 rounded-xl font-semibold transition text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span class="hidden lg:block">Live Availability</span>
+                </button>
+                <button onclick="switchTab('vehicles')" id="nav-vehicles" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-stone-500 hover:bg-stone-200/60 hover:text-stone-800 rounded-xl font-medium transition text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                    <span class="hidden lg:block">My Vehicles</span>
+                </button>
+                <button onclick="switchTab('fines')" id="nav-fines" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-stone-500 hover:bg-stone-200/60 hover:text-stone-800 rounded-xl font-medium transition text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <span class="hidden lg:block">Fines & Appeals</span>
+                </button>
+                <button onclick="switchTab('problems')" id="nav-problems" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-stone-500 hover:bg-stone-200/60 hover:text-stone-800 rounded-xl font-medium transition text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    <span class="hidden lg:block">Problems & Solutions</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Student Profile -->
+        <div class="p-4 border-t border-stone-200">
+            <div class="flex items-center gap-3 px-2 py-2 text-stone-600">
+                <img src="https://ui-avatars.com/api/?name=Ahmed+Saeed&background=f59e0b&color=fff" alt="Profile" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+                <div class="hidden lg:block overflow-hidden">
+                    <p class="text-sm font-bold text-stone-800 truncate">Ahmed Saeed</p>
+                    <p class="text-xs text-stone-500 truncate">Permit: #STU-2026</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative h-full bg-[#FAF9F6]">
+        
+        <!-- Top Campus Alert Banner -->
+        <div class="bg-amber-100/80 backdrop-blur-md border-b border-amber-200 text-amber-900 text-xs sm:text-sm font-medium py-3 px-4 text-center flex justify-center items-center gap-3 sticky top-0 z-40">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </span>
+            <span><strong>Campus Alert:</strong> High arrival density expected until 11:30 AM. Levels 3 & 4 currently have the most open spots.</span>
+        </div>
+
+        <!-- PAGE 1: LIVE AVAILABILITY -->
+        <div id="page-availability" class="tab-content max-w-7xl mx-auto px-6 sm:px-10 py-8 pb-32">
+            
+            <header class="bg-gradient-to-br from-stone-100 to-stone-200/80 border border-stone-300/60 rounded-[2rem] p-8 sm:p-10 mb-10 text-stone-800 shadow-sm flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-stone-500 uppercase tracking-widest mb-3">
+                        <span class="px-3 py-1 bg-white rounded-full border border-stone-200 shadow-sm">RIT Dubai Campus Garage</span>
+                    </div>
+                    <h1 class="font-heading text-4xl sm:text-5xl font-extrabold tracking-tight mb-2 text-stone-900">Good Morning!</h1>
+                    <p class="text-stone-600 text-base sm:text-lg max-w-xl leading-relaxed">Check live spot availability before arriving to campus to park quickly.</p>
+                </div>
+            </header>
+
+            <!-- Real-time Dynamic Metrics -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border-t-[3px] border-t-amber-500">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Total Open Spots</span>
+                        <span class="p-2 bg-amber-100 text-amber-600 rounded-xl border border-amber-200">🚗</span>
+                    </div>
+                    <div class="my-4">
+                        <span id="metric-total-open" class="font-heading text-5xl font-extrabold text-stone-900 tracking-tight">--</span>
+                        <span id="metric-total-capacity" class="text-stone-400 font-semibold text-lg"> / 416</span>
+                    </div>
+                    <div class="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
+                        <div id="metric-total-bar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Recommended Floor</span>
+                        <span class="p-2 bg-emerald-100 text-emerald-600 rounded-xl border border-emerald-200">🎯</span>
+                    </div>
+                    <div class="my-4">
+                        <span id="metric-recommended" class="font-heading text-3xl font-extrabold text-stone-900">Level 4</span>
+                        <p class="text-xs text-emerald-600 font-semibold mt-2">Highest open density</p>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Est. Search Time</span>
+                        <span class="p-2 bg-stone-100 text-stone-600 rounded-xl border border-stone-200">⏱️</span>
+                    </div>
+                    <div class="my-4">
+                        <span class="font-heading text-4xl font-extrabold text-stone-900">1.5 <span class="text-xl font-bold text-stone-400">min</span></span>
+                        <p class="text-xs text-stone-500 mt-2">Fast parking flow</p>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Campus Traffic</span>
+                        <span class="p-2 bg-stone-100 text-stone-600 rounded-xl border border-stone-200">📈</span>
+                    </div>
+                    <div class="my-4">
+                        <span class="font-heading text-2xl font-extrabold text-stone-900">Moderate</span>
+                        <div class="flex items-center gap-1.5 mt-3">
+                            <span class="h-1.5 w-full bg-emerald-400 rounded-full"></span>
+                            <span class="h-1.5 w-full bg-amber-400 rounded-full"></span>
+                            <span class="h-1.5 w-full bg-stone-200 rounded-full"></span>
+                            <span class="h-1.5 w-full bg-stone-200 rounded-full"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Level Breakdown Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left 2 Columns: Level Cards -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="flex justify-between items-center mb-2 px-2">
+                        <h2 class="font-heading text-2xl font-extrabold text-stone-900">Level Breakdown</h2>
+                        <span class="text-xs font-semibold text-stone-500 flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-stone-200 shadow-sm">
+                            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg> Hover level to view live map layout
+                        </span>
+                    </div>
+
+                    <!-- Level 4 Card -->
+                    <div class="group relative hover:z-50 glass-card glass-card-hover rounded-3xl p-7 border-l-[6px] border-l-emerald-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <h3 class="font-heading text-2xl font-extrabold text-stone-900">Level 4</h3>
+                                <span class="bg-stone-100 text-stone-600 text-xs px-3 py-1 rounded-md font-bold border border-stone-200">Uncovered Roof</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="count-f4" class="font-heading text-3xl font-black text-emerald-600">--</span>
+                                <span class="text-stone-400 text-sm font-semibold">/104 free</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div id="bar-f4" class="progress-bar bg-emerald-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Hover Pop-up Layout Map -->
+                        <div class="absolute z-50 left-0 top-[90%] pt-4 w-full opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 drop-shadow-2xl">
+                            <div class="blueprint-bg p-6 rounded-3xl border border-stone-200 shadow-2xl">
+                                <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-300">
+                                    <p class="text-xs font-extrabold text-stone-600 uppercase tracking-widest flex items-center gap-2">Map - Level 4 Layout</p>
+                                    <span class="flex gap-4 text-xs font-bold text-stone-600">
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-400 rounded-sm"></span> Open Spot</span> 
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-rose-400 rounded-sm"></span> Occupied</span>
+                                    </span>
+                                </div>
+                                <div id="grid-f4" class="flex flex-col gap-2 items-center"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 3 Card -->
+                    <div class="group relative hover:z-50 glass-card glass-card-hover rounded-3xl p-7 border-l-[6px] border-l-emerald-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <h3 class="font-heading text-2xl font-extrabold text-stone-900">Level 3</h3>
+                                <span class="bg-stone-200/50 text-stone-600 text-xs px-3 py-1 rounded-md font-bold border border-stone-200">Covered</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="count-f3" class="font-heading text-3xl font-black text-emerald-600">--</span>
+                                <span class="text-stone-400 text-sm font-semibold">/104 free</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div id="bar-f3" class="progress-bar bg-emerald-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Hover Pop-up Layout Map -->
+                        <div class="absolute z-50 left-0 top-[90%] pt-4 w-full opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 drop-shadow-2xl">
+                            <div class="blueprint-bg p-6 rounded-3xl border border-stone-200 shadow-2xl">
+                                <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-300">
+                                    <p class="text-xs font-extrabold text-stone-600 uppercase tracking-widest flex items-center gap-2">Map - Level 3 Layout</p>
+                                    <span class="flex gap-4 text-xs font-bold text-stone-600">
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-400 rounded-sm"></span> Open Spot</span> 
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-rose-400 rounded-sm"></span> Occupied</span>
+                                    </span>
+                                </div>
+                                <div id="grid-f3" class="flex flex-col gap-2 items-center"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 2 Card -->
+                    <div class="group relative hover:z-50 glass-card glass-card-hover rounded-3xl p-7 border-l-[6px] border-l-amber-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <h3 class="font-heading text-2xl font-extrabold text-stone-900">Level 2</h3>
+                                <span class="bg-stone-200/50 text-stone-600 text-xs px-3 py-1 rounded-md font-bold border border-stone-200">Covered</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="count-f2" class="font-heading text-3xl font-black text-amber-600">--</span>
+                                <span class="text-stone-400 text-sm font-semibold">/104 free</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div id="bar-f2" class="progress-bar bg-amber-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Hover Pop-up Layout Map -->
+                        <div class="absolute z-50 left-0 top-[90%] pt-4 w-full opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 drop-shadow-2xl">
+                            <div class="blueprint-bg p-6 rounded-3xl border border-stone-200 shadow-2xl">
+                                <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-300">
+                                    <p class="text-xs font-extrabold text-stone-600 uppercase tracking-widest flex items-center gap-2">Map - Level 2 Layout</p>
+                                    <span class="flex gap-4 text-xs font-bold text-stone-600">
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-400 rounded-sm"></span> Open Spot</span> 
+                                        <span class="flex items-center gap-2"><span class="w-3 h-3 bg-rose-400 rounded-sm"></span> Occupied</span>
+                                    </span>
+                                </div>
+                                <div id="grid-f2" class="flex flex-col gap-2 items-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Level 1 Card (Standard Parking + EV Charging Zone) -->
+                    <div class="group relative hover:z-50 glass-card glass-card-hover rounded-3xl p-7 border-l-[6px] border-l-rose-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <h3 class="font-heading text-2xl font-extrabold text-stone-900">Level 1</h3>
+                                <span class="bg-stone-200/50 text-stone-600 text-xs px-3 py-1 rounded-md font-bold border border-stone-200">Covered + EV Bays</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="count-f1" class="font-heading text-3xl font-black text-rose-500">--</span>
+                                <span class="text-stone-400 text-sm font-semibold">/104 free</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2 mb-5 overflow-hidden shadow-inner">
+                            <div id="bar-f1" class="progress-bar bg-rose-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 pt-4 border-t border-stone-200">
+                            <div class="w-10 h-10 rounded-xl bg-sky-100 border border-sky-200 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div class="text-xs text-stone-600">
+                                <p class="font-bold text-stone-800">Includes 6 Designated EV Charging Bays</p>
+                                <p>Standard parking spots (green) with dedicated EV chargers (blue) on row 1.</p>
+                            </div>
+                        </div>
+
+                        <!-- Hover Pop-up Layout Map -->
+                        <div class="absolute z-50 left-0 bottom-[90%] pb-4 w-full opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 drop-shadow-2xl">
+                            <div class="blueprint-bg p-6 rounded-3xl border border-stone-200 shadow-2xl">
+                                <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-300">
+                                    <p class="text-xs font-extrabold text-stone-600 uppercase tracking-widest flex items-center gap-2">Map - Level 1 Layout</p>
+                                    <span class="flex gap-3 text-xs font-bold text-stone-600">
+                                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-400 rounded-sm"></span> Open</span> 
+                                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-sky-500 rounded-sm"></span> Open EV</span>
+                                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-rose-400 rounded-sm"></span> Occupied</span>
+                                    </span>
+                                </div>
+                                <div id="grid-f1" class="flex flex-col gap-2 items-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Quick Updates -->
+                <div class="space-y-6">
+                    <div class="glass-card rounded-3xl p-6 border-t-[3px] border-t-amber-500 sticky top-24">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="font-heading font-extrabold text-stone-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                Campus Parking Announcements
+                            </h3>
+                        </div>
+                        <div class="space-y-4 text-sm">
+                            <div class="bg-stone-50 border border-stone-200 p-4 rounded-xl text-stone-600 shadow-sm">
+                                <p class="font-bold text-stone-900 mb-1">Lot Maintenance Next Week</p>
+                                <p class="text-xs">Level 4 section B will be temporarily closed on Monday for line repainting.</p>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-200/60 p-4 rounded-xl text-amber-900 shadow-sm">
+                                <p class="font-bold text-amber-950 mb-1">EV Charging Courtesy</p>
+                                <p class="text-xs">Please limit EV charging sessions on Level 1 to 2 hours maximum during peak hours.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: MY VEHICLES -->
+        <div id="page-vehicles" class="tab-content hidden max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-32">
+            <div class="mb-8 flex justify-between items-end">
+                <div>
+                    <h1 class="font-heading text-4xl font-extrabold text-stone-900">My Registered Vehicles</h1>
+                    <p class="text-stone-600 text-sm mt-1">Manage vehicles tied to your active student parking permit.</p>
+                </div>
+                <button onclick="openRegisterModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md transition">+ Register Vehicle</button>
+            </div>
+
+            <div id="vehicles-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Vehicle 1 -->
+                <div class="glass-card rounded-3xl p-6 border-l-4 border-l-amber-500 flex justify-between items-start">
+                    <div>
+                        <h3 class="font-heading text-2xl font-bold text-stone-900">Toyota Camry</h3>
+                        <p class="text-stone-500 text-sm font-semibold mt-1">Plate: <span class="text-stone-800 font-mono">A 84920 (Dubai)</span></p>
+                        <p class="text-xs text-stone-400 mt-4">Permit Valid: Sep 2026 - May 2027</p>
+                    </div>
+                    <button class="text-stone-400 hover:text-stone-700 text-sm font-semibold">Edit</button>
+                </div>
+
+                <!-- Vehicle 2 -->
+                <div class="glass-card rounded-3xl p-6 border-l-4 border-l-amber-500 flex justify-between items-start">
+                    <div>
+                        <h3 class="font-heading text-2xl font-bold text-stone-900">Nissan Altima</h3>
+                        <p class="text-stone-500 text-sm font-semibold mt-1">Plate: <span class="text-stone-800 font-mono">B 10293 (Sharjah)</span></p>
+                        <p class="text-xs text-stone-400 mt-4">Permit Valid: Sep 2026 - May 2027</p>
+                    </div>
+                    <button class="text-stone-400 hover:text-stone-700 text-sm font-semibold">Edit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: FINES & APPEALS -->
+        <div id="page-fines" class="tab-content hidden max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-32">
+            <div class="mb-8">
+                <h1 class="font-heading text-4xl font-extrabold text-stone-900">Fines & Appeals</h1>
+                <p class="text-stone-600 text-sm mt-1">View parking violation notices and submit appeals directly to campus security.</p>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 mb-8">
+                <div class="flex items-center justify-between border-b border-stone-200 pb-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 bg-rose-100 text-rose-600 rounded-xl">⚠️</span>
+                        <div>
+                            <h3 class="font-bold text-stone-900">Citation #PRK-8821</h3>
+                            <p class="text-xs text-stone-500">Issued Sep 10, 2026 - Level 1 Standard Spot</p>
+                        </div>
+                    </div>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Appeal Under Review</span>
+                </div>
+                <div class="text-sm text-stone-600 space-y-2">
+                    <p><strong>Reason:</strong> Occupying multiple spots</p>
+                    <p><strong>Amount:</strong> 100 AED</p>
+                </div>
+            </div>
+
+            <!-- Submit Appeal Card -->
+            <div class="glass-card rounded-3xl p-8">
+                <h3 class="font-heading text-xl font-bold text-stone-900 mb-4">Submit a Fine Appeal</h3>
+                <form onsubmit="event.preventDefault(); alert('Appeal submitted successfully!');" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-stone-500 mb-1">Citation Number</label>
+                        <input type="text" placeholder="e.g. PRK-8821" class="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-stone-500 mb-1">Reason for Appeal</label>
+                        <textarea rows="3" placeholder="Explain the context or reason for appeal..." class="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                    </div>
+                    <button type="submit" class="bg-stone-800 hover:bg-stone-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition">Submit Appeal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE 4: PROBLEMS & SOLUTIONS -->
+        <div id="page-problems" class="tab-content hidden max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-32">
+            <div class="mb-8">
+                <span class="px-3 py-1 bg-amber-100 text-amber-900 text-xs font-bold rounded-full border border-amber-200">Campus Improvement Initiative</span>
+                <h1 class="font-heading text-4xl font-extrabold text-stone-900 mt-2">Problems & Solutions</h1>
+                <p class="text-stone-600 text-sm mt-1">How the ParkFlow portal addresses key challenges faced by campus parking operations.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Problem #1 -->
+                <div class="glass-card rounded-3xl p-7 border-t-4 border-t-amber-500">
+                    <div class="p-2.5 bg-amber-100 text-amber-800 w-fit rounded-xl font-bold text-xs mb-4">Problem #1</div>
+                    <h3 class="font-heading text-xl font-bold text-stone-900 mb-2">Rapidly Growing Student Population</h3>
+                    <p class="text-stone-600 text-sm leading-relaxed mb-4">As campus enrollment swells year-over-year, static garage space experiences severe bottlenecks during morning rush hours, causing traffic spillover onto surrounding city roads.</p>
+                    <div class="bg-stone-100/80 p-4 rounded-2xl border border-stone-200">
+                        <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Our Portal Solution</p>
+                        <p class="text-xs text-stone-700 leading-normal">Live level-by-level capacity telemetry balances garage distribution before drivers arrive, maximizing space utilization across upper floors and eliminating search delays without needing costly garage expansions.</p>
+                    </div>
+                </div>
+
+                <!-- Problem #2 -->
+                <div class="glass-card rounded-3xl p-7 border-t-4 border-t-amber-500">
+                    <div class="p-2.5 bg-amber-100 text-amber-800 w-fit rounded-xl font-bold text-xs mb-4">Problem #2</div>
+                    <h3 class="font-heading text-xl font-bold text-stone-900 mb-2">Unchecked Rulebreakers & Poor Parking Habits</h3>
+                    <p class="text-stone-600 text-sm leading-relaxed mb-4">Drivers taking up multiple spots, blocking access lanes, or ignoring garage rules reduce usable capacity for everyone and create safety hazards for pedestrians.</p>
+                    <div class="bg-stone-100/80 p-4 rounded-2xl border border-stone-200">
+                        <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Our Portal Solution</p>
+                        <p class="text-xs text-stone-700 leading-normal">Enforces accountability with automated citation reporting, transparent dispute tracking, and swift penalty escalation for repeat offenders to keep parking orderly.</p>
+                    </div>
+                </div>
+
+                <!-- Problem #3 -->
+                <div class="glass-card rounded-3xl p-7 border-t-4 border-t-amber-500 md:col-span-2">
+                    <div class="p-2.5 bg-amber-100 text-amber-800 w-fit rounded-xl font-bold text-xs mb-4">Problem #3</div>
+                    <h3 class="font-heading text-xl font-bold text-stone-900 mb-2">Unauthorized Outsiders & Non-Student Parking</h3>
+                    <p class="text-stone-600 text-sm leading-relaxed mb-4">Nearby commuters and unauthorized visitors frequently exploit open garage gates to park for free, depriving tuition-paying students of designated spaces.</p>
+                    <div class="bg-stone-100/80 p-4 rounded-2xl border border-stone-200">
+                        <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Our Portal Solution</p>
+                        <p class="text-xs text-stone-700 leading-normal">Synchronizes vehicle plate registrations with automated entry barriers, guaranteeing garage access is strictly restricted to valid student permit holders.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal for Adding New Vehicle -->
+    <div id="register-modal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-card bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl border border-stone-200">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-heading text-2xl font-bold text-stone-900">Register New Vehicle</h3>
+                <button onclick="closeRegisterModal()" class="text-stone-400 hover:text-stone-600 text-xl font-bold">&times;</button>
+            </div>
+            <form id="register-vehicle-form" onsubmit="handleRegisterVehicle(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-stone-500 mb-1">Vehicle Model & Make</label>
+                    <input type="text" id="veh-model" required placeholder="e.g. Honda Accord" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-stone-500 mb-1">Plate Number</label>
+                    <input type="text" id="veh-plate" required placeholder="e.g. C 54321" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-stone-500 mb-1">Emirate / State</label>
+                    <input type="text" id="veh-region" required placeholder="e.g. Dubai" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeRegisterModal()" class="w-1/2 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold text-sm py-3 rounded-xl transition">Cancel</button>
+                    <button type="submit" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3 rounded-xl transition shadow-md">Add Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn w-full flex items-center gap-4 px-4 py-3 text-stone-500 hover:bg-stone-200/60 hover:text-stone-800 rounded-xl font-medium transition text-left';
+            });
+
+            const targetPage = document.getElementById(`page-${tabId}`);
+            if (targetPage) targetPage.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.className = 'nav-btn w-full flex items-center gap-4 px-4 py-3 bg-amber-100 text-amber-900 rounded-xl font-semibold transition text-left';
+            }
+        }
+
+        // Vehicle Modal Logic
+        function openRegisterModal() {
+            document.getElementById('register-modal').classList.remove('hidden');
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('register-modal').classList.add('hidden');
+            document.getElementById('register-vehicle-form').reset();
+        }
+
+        function handleRegisterVehicle(event) {
+            event.preventDefault();
+            const model = document.getElementById('veh-model').value.trim();
+            const plate = document.getElementById('veh-plate').value.trim();
+            const region = document.getElementById('veh-region').value.trim();
+
+            if (!model || !plate || !region) return;
+
+            const grid = document.getElementById('vehicles-grid');
+            const newCard = document.createElement('div');
+            newCard.className = 'glass-card rounded-3xl p-6 border-l-4 border-l-amber-500 flex justify-between items-start';
+            newCard.innerHTML = `
+                <div>
+                    <h3 class="font-heading text-2xl font-bold text-stone-900">${model}</h3>
+                    <p class="text-stone-500 text-sm font-semibold mt-1">Plate: <span class="text-stone-800 font-mono">${plate} (${region})</span></p>
+                    <p class="text-xs text-stone-400 mt-4">Permit Valid: Sep 2026 - May 2027</p>
+                </div>
+                <button class="text-stone-400 hover:text-stone-700 text-sm font-semibold">Edit</button>
+            `;
+            grid.appendChild(newCard);
+            closeRegisterModal();
+        }
+
+        // Render Grids & Synchronize Open Spot Counts Dynamically
+        function renderGridsAndSyncMetrics() {
+            const rowShape = [6, 8, 10, 12, 14, 16, 18, 20]; 
+            const levels = [
+                { id: 'f4', openRatio: 0.82 },
+                { id: 'f3', openRatio: 0.69 },
+                { id: 'f2', openRatio: 0.43 },
+                { id: 'f1', openRatio: 0.15 }
+            ];
+
+            let grandTotalOpen = 0;
+            let grandTotalCapacity = 0;
+            let highestOpenCount = -1;
+            let recommendedLevelName = 'Level 4';
+
+            levels.forEach(lvl => {
+                const gridContainer = document.getElementById(`grid-${lvl.id}`);
+                if (!gridContainer) return;
+                
+                gridContainer.innerHTML = '';
+                let actualOpenCount = 0;
+                let actualTotalSpots = 0;
+
+                rowShape.forEach((spotCount, rowIndex) => {
+                    const row = document.createElement('div');
+                    row.className = 'flex gap-2 justify-center';
+                    
+                    for (let i = 0; i < spotCount; i++) {
+                        actualTotalSpots++;
+                        let isTaken = Math.random() > lvl.openRatio;
+
+                        const isLevel1EVRow = (lvl.id === 'f1' && rowIndex === 0 && i < 6);
+
+                        // Explicitly guarantee several EV spots remain open to clearly display the blue spots
+                        if (isLevel1EVRow && (i === 0 || i === 2 || i === 4)) {
+                            isTaken = false;
+                        }
+
+                        let colorClass = '';
+                        if (isTaken) {
+                            colorClass = 'bg-rose-400/90 shadow-[0_0_6px_rgba(251,113,133,0.3)]';
+                        } else {
+                            actualOpenCount++;
+                            if (isLevel1EVRow) {
+                                colorClass = 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.4)]'; // Blue for open EV spot
+                            } else {
+                                colorClass = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]'; // Green for open regular spot
+                            }
+                        }
+
+                        const dot = document.createElement('div');
+                        dot.className = `spot-dot w-3 h-5 rounded-[2px] border border-stone-200/40 ${colorClass}`;
+                        if (isLevel1EVRow) {
+                            dot.title = isTaken ? "EV Charger Occupied" : "EV Charger Available";
+                        }
+                        row.appendChild(dot);
+                    }
+                    gridContainer.appendChild(row);
+                });
+
+                const countElem = document.getElementById(`count-${lvl.id}`);
+                const barElem = document.getElementById(`bar-${lvl.id}`);
+                
+                if (countElem) countElem.innerText = actualOpenCount;
+                if (barElem) {
+                    const occPercent = Math.round(((actualTotalSpots - actualOpenCount) / actualTotalSpots) * 100);
+                    barElem.style.width = `${occPercent}%`;
+                }
+
+                grandTotalOpen += actualOpenCount;
+                grandTotalCapacity += actualTotalSpots;
+
+                if (actualOpenCount > highestOpenCount) {
+                    highestOpenCount = actualOpenCount;
+                    recommendedLevelName = `Level ${lvl.id.replace('f', '')}`;
+                }
+            });
+
+            const metricOpen = document.getElementById('metric-total-open');
+            const metricCap = document.getElementById('metric-total-capacity');
+            const metricBar = document.getElementById('metric-total-bar');
+            const metricRec = document.getElementById('metric-recommended');
+
+            if (metricOpen) metricOpen.innerText = grandTotalOpen;
+            if (metricCap) metricCap.innerText = ` / ${grandTotalCapacity}`;
+            if (metricBar) {
+                const totalOccPercent = Math.round(((grandTotalCapacity - grandTotalOpen) / grandTotalCapacity) * 100);
+                metricBar.style.width = `${totalOccPercent}%`;
+            }
+            if (metricRec) metricRec.innerText = recommendedLevelName;
+        }
+
+        window.addEventListener('DOMContentLoaded', renderGridsAndSyncMetrics);
+    </script>
+</body>
+</html>
